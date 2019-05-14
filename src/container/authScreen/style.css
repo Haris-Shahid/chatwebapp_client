@@ -1,0 +1,31 @@
+
+.paper-center{
+    margin: 100px auto;
+    width: 400px;
+    padding: 10px;
+    
+}
+.input-field {
+    width: 380px
+}
+.input-container{
+    margin: 10px 0px !important;
+}
+.condition-Txt{
+    margin: 10px 0px 0px;
+    text-align: center;
+}
+.btn-auth{
+    margin-top: 10px
+}
+.error-txt{
+    margin: 10px 0px;
+    text-align: center;
+    color: #d44950;
+}
+.loader{
+    position: absolute;
+    top: 50%;
+    left: 48%;
+    color: #007bff !important;
+}
