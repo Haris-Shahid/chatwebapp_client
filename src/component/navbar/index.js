@@ -22,7 +22,7 @@ class Navbar extends Component {
                     <div className='navbar-brand' >Welcome </div>
                 </div>
                 <div className='navbar-item right-nav' >
-                    <a href='javascript:void(0)' onClick={this.logout.bind(this)} className='nav-link' >Logout</a>
+                    <button onClick={this.logout.bind(this)} className='btn btn-primary' >Logout</button>
                 </div>
             </div>
         )

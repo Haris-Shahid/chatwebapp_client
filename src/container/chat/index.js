@@ -3,8 +3,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import UserList from '../../component/userList/index';
 import './style.css';
+import jwt_decode from 'jwt-decode';
 
 import ChatAction from '../../store/actions/chatAction';
+import AuthAction from '../../store/actions/authAction';
 
 class Chat extends Component {
     constructor(props) {
@@ -19,6 +21,13 @@ class Chat extends Component {
     componentDidMount() {
         this.handleChatList(this.props.messages)
         this.scrollToBottom();
+        if (localStorage.usertoken) {
+            let decode = jwt_decode(localStorage.usertoken);
+            if (decode.username) {
+                this.props.addUser(decode)
+            }
+        }
+        this.props.handleChatSockets(this.props.socket)
     }
 
     componentDidUpdate() {
@@ -28,7 +37,7 @@ class Chat extends Component {
     handleChatList(messages) {
         let chat = [];
         const { _id } = this.props.location.state.selectedUser;
-        messages.map(v => {
+        messages.forEach(v => {
             if (v.senderId === this.props._id || v.senderId === _id || v.receiverId === this.props._id || v.receiverId === _id) {
                 chat.push(v)
             }
@@ -40,13 +49,12 @@ class Chat extends Component {
 
     componentWillReceiveProps(props) {
         if (props.messages) {
-            console.log(props.messages)
             this.handleChatList(props.messages)
         }
     }
 
     handleSubmit() {
-        const { username, _id } = this.props.location.state.selectedUser;
+        const { _id } = this.props.location.state.selectedUser;
         if (this.state.message) {
             let chat = {
                 senderId: this.props._id,
@@ -95,13 +103,14 @@ class Chat extends Component {
                                                 </div>
                                             )
                                         }
+                                        return null;
                                     }) : null
                             }
                             < div ref={re => this.scrl = re} className='scrolltobottom' ></div>
                         </ul>
                     </div>
                     <div className='input_cont' >
-                        <input onChange={(e) => this.setState({ message: e.target.value })} />
+                        <input onChange={(e) => this.setState({ message: e.target.value })} value={this.state.message} />
                         <button onClick={this.handleSubmit.bind(this)} >Send</button>
                     </div>
                 </div>
@@ -122,7 +131,9 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        sendMessage: (m, s) => dispatch(ChatAction.sendMessage(m, s))
+        sendMessage: (m, s) => dispatch(ChatAction.sendMessage(m, s)),
+        addUser: (u) => dispatch(AuthAction.addUser(u)),
+        handleChatSockets: (io) => dispatch(ChatAction.handleSockets(io))
     }
 }
 

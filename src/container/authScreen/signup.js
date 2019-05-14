@@ -22,10 +22,10 @@ class Signup extends Component {
     handleChange(v, e) {
         if (v === 'username') {
             let regrex = /^(?:\w+\W+){0,2}(?:\w+)$/;
-            if ( e.target.value.match(regrex) !== null  ){
+            if (e.target.value.match(regrex) !== null) {
                 this.setState({ [v]: e.target.value })
-            }else{
-                if(e.target.value.length === 0){
+            } else {
+                if (e.target.value.length === 0) {
                     this.setState({ [v]: '' })
                 }
             }
@@ -36,7 +36,8 @@ class Signup extends Component {
         }
     }
 
-    handleSubmit() {
+    handleSubmit(e) {
+        e.preventDefault()
         const { username, email, password, confirmPassword } = this.state;
         var validation = `${
             !username ? 'Please enter Username' :
@@ -48,7 +49,7 @@ class Signup extends Component {
                                     confirmPassword !== password ? "Your password doesn't match" : null}`
         if (validation === null || validation === "null") {
             this.setState({ error: null })
-            this.props.signUp(this.state, this.props.history)
+            this.props.signUp(this.state, this.props.history, this.props.socket)
         } else {
             this.setState({ error: validation })
         }
@@ -85,9 +86,9 @@ class Signup extends Component {
                                 <Input id="confirmPassword" className='input-field' type='password' value={this.state.confirmPassword} onChange={(e) => this.handleChange('confirmPassword', e)} />
                             </FormControl>
                             {(this.state.error !== null || this.state.error !== 'null') && <div className='error-txt' >{this.state.error}</div>}
-                            <button onClick={() => this.handleSubmit()} type="button" className="btn-primary btn-lg btn-block btn-auth">Sign Up</button>
+                            <button onClick={(e) => this.handleSubmit(e)} type="button" className="btn-primary btn-lg btn-block btn-auth">Sign Up</button>
                             <div className='condition-Txt' >
-                                Already have an Account <a href='javascript:void(0)' onClick={() => this.props.history.goBack()} >Log In</a>
+                                Already have an Account <button className='btn btn-transparent login-btn' onClick={() => this.props.history.goBack()} >Log In</button>
                             </div>
                         </Paper>
                 }
@@ -100,11 +101,12 @@ const mapStateToProps = (state) => {
     return {
         loading: state.AuthReducer.loading,
         error: state.AuthReducer.error,
+        socket: state.AuthReducer.socket,
     };
 }
 const mapDispatchToProps = (dispatch) => {
     return {
-        signUp: (state, nav) => dispatch(AuthAction.signUp(state, nav)),
+        signUp: (state, nav, io) => dispatch(AuthAction.signUp(state, nav, io)),
     }
 }
 

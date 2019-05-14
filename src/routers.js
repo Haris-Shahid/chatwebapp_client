@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { BrowserRouter, Route, NavLink, Redirect } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 
 import { connect } from 'react-redux';
@@ -14,11 +14,7 @@ import Navbar from './component/navbar/index';
 
 class AllRoutes extends Component {
 
-    constructor(props) {
-        super(props);
-    }
-    
-    componentWillMount(){
+    componentWillMount() {
         this.props.connectSocket()
     }
 

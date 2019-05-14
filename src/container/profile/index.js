@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { NavLink, Route } from 'react-router-dom';
-// import jwt_decode from 'jwt-decode';
+import jwt_decode from 'jwt-decode';
 
+import AuthAction from '../../store/actions/authAction';
+import ChatAction from '../../store/actions/chatAction';
 import { connect } from 'react-redux';
 
 import './style.css';
@@ -16,11 +17,25 @@ class Profile extends Component {
         }
     }
     componentDidMount() {
-        // let decode = jwt_decode(localStorage.usertoken);
+        if (localStorage.usertoken) {
+            let decode = jwt_decode(localStorage.usertoken);
+            if (decode.username) {
+                this.props.addUser(decode)
+            }
+        }
+        this.props.handleChatSockets(this.props.AuthReducer.socket)
+        this.updateState(this.props)
+    }
+
+    updateState(props) {
         this.setState({
-            username: this.props.AuthReducer.username,
-            email: this.props.AuthReducer.email
+            username: props.AuthReducer.username,
+            email: props.AuthReducer.email
         })
+    }
+
+    componentWillReceiveProps(newProps) {
+        this.updateState(newProps)
     }
     render() {
         return (
@@ -52,4 +67,11 @@ const mapStateToProps = state => {
     return state
 }
 
-export default connect(mapStateToProps, {})(Profile);
+const mapDispatchToProps = dispatch => {
+    return {
+        addUser: (u) => dispatch(AuthAction.addUser(u)),
+        handleChatSockets: (io) => dispatch(ChatAction.handleSockets(io))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);

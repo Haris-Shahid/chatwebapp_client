@@ -23,6 +23,7 @@ class UserList extends Component {
                                     state: { selectedUser: v }
                                 }} >{v.username}</NavLink>)
                             }
+                            return null;
                         }) : null
                 }
             </div>

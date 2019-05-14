@@ -1,21 +1,30 @@
-import { LOADING_START, GOT_ERROR, USER_REGISTERED, USER_LOG_IN, ADD_SOCKET, GET_MESSAGES, GET_USERS } from '../actionTypes';
+import { LOADING_START, GOT_ERROR, USER_REGISTERED, USER_LOG_IN, ADD_SOCKET, ADD_USER } from '../actionTypes';
 import axios from 'axios';
-// import jwt_decode from 'jwt-decode';
+import jwt_decode from 'jwt-decode';
 import socketIOClient from "socket.io-client";
 
+let axiosConfig = {
+    headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        "Access-Control-Allow-Origin": "*",
+    }
+};
 export default class AuthAction {
 
     static connectSocket() {
         return dispatch => {
-            const socket = socketIOClient('https://patienttracking.herokuapp.com');
-            dispatch({
-                type: ADD_SOCKET,
-                socket
-            })
+            const socket = socketIOClient('http://localhost:4000');
+            dispatch({ type: ADD_SOCKET, socket })
         }
     }
 
-    static signUp(user, nav) {
+    static addUser(user) {
+        return dispatch => {
+            dispatch({ type: ADD_USER, user })
+        }
+    }
+
+    static signUp(user, nav, io) {
         return dispatch => {
             dispatch({
                 type: LOADING_START
@@ -25,7 +34,7 @@ export default class AuthAction {
                 email: user.email,
                 password: user.password
             }
-            axios.post('auth/register', authUser)
+            axios.post('http://localhost:4000/auth/register', authUser, axiosConfig)
                 .then(res => {
                     if (res.data.error) {
                         dispatch({
@@ -33,19 +42,13 @@ export default class AuthAction {
                             error: res.data.error
                         })
                     } else {
-                        dispatch({
-                            type: USER_REGISTERED,
-                            user: res.data.user
-                        })
+                        dispatch({ type: USER_REGISTERED, user: res.data.user })
+                        io.emit('newRegistration', res.data.user)
                         nav.goBack();
                     }
                 }).catch(err => {
-                    dispatch({
-                        type: GOT_ERROR,
-                        error: err
-                    })
+                    dispatch({ type: GOT_ERROR, error: err })
                 })
-
         }
     }
     static logIn(user, nav, socket) {
@@ -57,45 +60,23 @@ export default class AuthAction {
                 email: user.email,
                 password: user.password
             }
-            axios.post('auth/login', authUser)
+            axios.post('http://localhost:4000/auth/login', authUser, axiosConfig)
                 .then(res => {
                     if (res.data.error) {
-                        dispatch({
-                            type: GOT_ERROR,
-                            error: res.data.error
-                        })
+                        dispatch({ type: GOT_ERROR, error: res.data.error })
                     } else {
-                        // console.log(res.data , '////////////')
-                        // if(res.data.payload){
-                            // localStorage.setItem('usertoken', res.data)
-                            // let decode = jwt_decode(res.data, { header: true });
-                            socket.on('all_Users', users => {
-                                console.log(users, '///////////////')
-                                dispatch({
-                                    type: GET_USERS,
-                                    allUsers: users
-                                })
-                            })
-                            socket.on('all_chats', chats => {
-                                console.log(chats, '///////////////')
-                                dispatch({
-                                    type: GET_MESSAGES,
-                                    messages: chats
-                                })
-                            })
-                            dispatch({
-                                type: USER_LOG_IN,
-                                decode: res.data.payload
-                            })
-                            nav.push('/profile')
-                        // }
+                        if (res.data.token) {
+                            localStorage.setItem('usertoken', res.data.token)
+                            let decode = jwt_decode(res.data.token);
+                            dispatch({ type: USER_LOG_IN, decode: decode })
+                        } else {
+                            dispatch({ type: GOT_ERROR, error: 'Network error' })
+                        }
+                        nav.push('/profile')
                     }
                 })
                 .catch(err => {
-                    dispatch({
-                        type: GOT_ERROR,
-                        error: err
-                    })
+                    dispatch({ type: GOT_ERROR, error: err })
                 })
         }
     }
