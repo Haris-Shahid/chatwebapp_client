@@ -13,7 +13,7 @@ export default class AuthAction {
 
     static connectSocket() {
         return dispatch => {
-            const socket = socketIOClient('http://localhost:4000');
+            const socket = socketIOClient('https://frozen-tundra-94013.herokuapp.com');
             dispatch({ type: ADD_SOCKET, socket })
         }
     }
@@ -34,7 +34,7 @@ export default class AuthAction {
                 email: user.email,
                 password: user.password
             }
-            axios.post('http://localhost:4000/auth/register', authUser, axiosConfig)
+            axios.post('https://frozen-tundra-94013.herokuapp.com/auth/register', authUser, axiosConfig)
                 .then(res => {
                     if (res.data.error) {
                         dispatch({
@@ -60,7 +60,7 @@ export default class AuthAction {
                 email: user.email,
                 password: user.password
             }
-            axios.post('http://localhost:4000/auth/login', authUser, axiosConfig)
+            axios.post('https://frozen-tundra-94013.herokuapp.com/auth/login', authUser, axiosConfig)
                 .then(res => {
                     if (res.data.error) {
                         dispatch({ type: GOT_ERROR, error: res.data.error })
