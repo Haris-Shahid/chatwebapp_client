@@ -21,9 +21,9 @@ class Profile extends Component {
             let decode = jwt_decode(localStorage.usertoken);
             if (decode.username) {
                 this.props.addUser(decode)
+                this.props.handleChatSockets(this.props.AuthReducer.socket, decode._id)
             }
         }
-        this.props.handleChatSockets(this.props.AuthReducer.socket)
         this.updateState(this.props)
     }
 
@@ -70,7 +70,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         addUser: (u) => dispatch(AuthAction.addUser(u)),
-        handleChatSockets: (io) => dispatch(ChatAction.handleSockets(io))
+        handleChatSockets: (io, uid) => dispatch(ChatAction.handleSockets(io, uid))
     }
 }
 

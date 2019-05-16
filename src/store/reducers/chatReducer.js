@@ -1,4 +1,4 @@
-import { GET_MESSAGES, GET_USERS, UPDATE_USER } from '../actionTypes';
+import { GET_MESSAGES, GET_USERS, UPDATE_USER, UPDATE_CHAT } from '../actionTypes';
 
 const initialState = {
     messages: [],
@@ -13,6 +13,8 @@ export default function ChatReducer(state = initialState, action) {
             return state = { ...state, allUsers: action.allUsers }
         case UPDATE_USER:
             return state = { ...state, allUsers: [...state.allUsers, action.user] }
+        case UPDATE_CHAT:
+            return state = { ...state, messages: [...state.messages, action.chat] }
         default:
             return state;
     }

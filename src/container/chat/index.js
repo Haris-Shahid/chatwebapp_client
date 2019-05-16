@@ -14,7 +14,10 @@ class Chat extends Component {
         this.socket = null;
         this.state = {
             message: '',
-            messages: []
+            messages: [],
+            uploadImage: '',
+            uploadImage1: '',
+            imageStatus: false,
         }
     }
 
@@ -25,9 +28,9 @@ class Chat extends Component {
             let decode = jwt_decode(localStorage.usertoken);
             if (decode.username) {
                 this.props.addUser(decode)
+                this.props.handleChatSockets(this.props.socket, decode._id)
             }
         }
-        this.props.handleChatSockets(this.props.socket)
     }
 
     componentDidUpdate() {
@@ -47,32 +50,53 @@ class Chat extends Component {
         })
     }
 
-    componentWillReceiveProps(props) {
-        if (props.messages) {
-            this.handleChatList(props.messages)
-        }
-    }
 
     handleSubmit() {
         const { _id } = this.props.location.state.selectedUser;
-        if (this.state.message) {
+        if (this.state.message || this.state.uploadImage) {
             let chat = {
                 senderId: this.props._id,
                 receiverId: _id,
-                message: this.state.message,
+                chat: {
+                    message: this.state.message,
+                    image: this.state.uploadImage1,
+                },
                 createdAt: new Date()
             }
             this.props.sendMessage(chat, this.props.socket)
             this.setState({
-                message: ''
+                message: '',
+                uploadImage: '',
+                imageStatus: false,
+                uploadImage1: ''
             })
         } else {
             alert('Type a message first')
         }
     }
 
+    uploadImage() {
+        var file = document.getElementById('fileid');
+        file.click();
+        let that = this
+        file.addEventListener('change', (e) => {
+            var reader = new FileReader();
+            reader.readAsDataURL(e.target.files[0])
+            reader.onloadend = function () {
+                that.setState({ uploadImage: [reader.result], imageStatus: true })
+            }
+            this.setState({ uploadImage1: e.target.files[0] })
+        });
+    }
+
     scrollToBottom = () => {
         this.scrl.scrollIntoView({ behavior: "smooth" });
+    }
+
+    componentWillReceiveProps(props) {
+        if (props.messages) {
+            this.handleChatList(props.messages)
+        }
     }
 
     render() {
@@ -91,15 +115,22 @@ class Chat extends Component {
                                     this.state.messages.map((v, i) => {
                                         if (v.receiverId === _id && v.senderId === this.props._id) {
                                             return (
-                                                <div key={i} style={{ textAlign: 'right' }} >
-                                                    <li className="sender-chat" >{v.message}</li>
+                                                <div key={i} style={{ textAlign: 'right' }}  >
+                                                    <div className="sender-chat" >
+                                                        {v.chat.image && <img src={v.chat.image} alt='there is network issue' />}
+                                                        {v.chat.message && <li>{v.chat.message}</li>}
+
+                                                    </div>
                                                 </div>
                                             )
                                         }
                                         if (v.receiverId === this.props._id && v.senderId === _id) {
                                             return (
                                                 <div key={i} >
-                                                    <li className="receiver-chat" >{v.message}</li>
+                                                    <div className="receiver-chat" >
+                                                        {v.chat.image && <img src={v.chat.image} alt='there is network issue' />}
+                                                        {v.chat.message && <li>{v.chat.message}</li>}
+                                                    </div>
                                                 </div>
                                             )
                                         }
@@ -108,11 +139,17 @@ class Chat extends Component {
                             }
                             < div ref={re => this.scrl = re} className='scrolltobottom' ></div>
                         </ul>
+                        <div className='image-container' style={{ display: this.state.imageStatus ? 'block' : 'none' }} >
+                            <button onClick={() => this.setState({ uploadImage: '', imageStatus: false, uploadImage1: '' })} style={{ display: this.state.imageStatus ? 'block' : 'none' }} >X</button>
+                            <img alt='image is not loaded' src={this.state.uploadImage} className='message-image' style={{ display: this.state.imageStatus ? 'block' : 'none' }} />
+                        </div>
                     </div>
                     <div className='input_cont' >
-                        <input onChange={(e) => this.setState({ message: e.target.value })} value={this.state.message} />
+                        <textarea rows={1} onChange={(e) => this.setState({ message: e.target.value })} value={this.state.message} ></textarea>
                         <button onClick={this.handleSubmit.bind(this)} >Send</button>
+                        <button type='file' onClick={this.uploadImage.bind(this)} >Image Upload</button>
                     </div>
+                    <input id='fileid' type='file' name='filename' accept="image/png" hidden={true} />
                 </div>
             </div >
 
@@ -133,7 +170,7 @@ const mapDispatchToProps = dispatch => {
     return {
         sendMessage: (m, s) => dispatch(ChatAction.sendMessage(m, s)),
         addUser: (u) => dispatch(AuthAction.addUser(u)),
-        handleChatSockets: (io) => dispatch(ChatAction.handleSockets(io))
+        handleChatSockets: (io, uid) => dispatch(ChatAction.handleSockets(io, uid))
     }
 }
 

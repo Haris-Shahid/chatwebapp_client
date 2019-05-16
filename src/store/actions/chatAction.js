@@ -1,4 +1,4 @@
-import { GET_MESSAGES, GET_USERS, UPDATE_USER } from '../actionTypes';
+import { GET_MESSAGES, GET_USERS, UPDATE_USER, UPDATE_CHAT } from '../actionTypes';
 
 export default class ChatAction {
     static sendMessage(chat, io) {
@@ -6,9 +6,9 @@ export default class ChatAction {
             io.emit('message_send', chat);
         }
     }
-    static handleSockets(socket) {
-        return dispatch => {
-            socket.emit('getUsersAndChats')
+    static handleSockets(socket, uid) {
+        return (dispatch, getState) => {
+            socket.emit('getUsersAndChats', { userUid: uid })
             socket.on('all_Users', users => {
                 dispatch({ type: GET_USERS, allUsers: users })
             })
@@ -17,6 +17,18 @@ export default class ChatAction {
             })
             socket.on('newRegisterUserAdded', (user) => {
                 dispatch({ type: UPDATE_USER, user })
+            })
+            socket.on('update_chat', (chat) => {
+                var flag = false;
+                var messages = getState().ChatReducer.messages;
+                messages.length !== 0 && messages.map(v => {
+                    if (v._id === chat._id) {
+                        flag = true;
+                    }
+                })
+                if (!flag) {
+                    dispatch({ type: UPDATE_CHAT, chat })
+                }
             })
         }
     }
