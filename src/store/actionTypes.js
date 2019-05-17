@@ -10,3 +10,5 @@ export const GET_MESSAGES = 'GET_MESSAGES';
 export const UPDATE_CHAT = 'UPDATE_CHAT';
 export const UPDATE_USER = 'UPDATE_USER';
 export const GET_USERS = 'GET_USERS';
+
+export const IMAGE_LOADER = 'IMAGE_LOADER';

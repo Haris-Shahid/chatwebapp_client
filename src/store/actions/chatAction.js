@@ -1,8 +1,11 @@
-import { GET_MESSAGES, GET_USERS, UPDATE_USER, UPDATE_CHAT } from '../actionTypes';
+import { GET_MESSAGES, GET_USERS, UPDATE_USER, UPDATE_CHAT, IMAGE_LOADER } from '../actionTypes';
 
 export default class ChatAction {
     static sendMessage(chat, io) {
         return dispatch => {
+            if (chat.chat.image) {
+                dispatch({ type: IMAGE_LOADER })
+            }
             io.emit('message_send', chat);
         }
     }

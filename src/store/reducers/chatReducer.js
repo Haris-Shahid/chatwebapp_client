@@ -1,8 +1,9 @@
-import { GET_MESSAGES, GET_USERS, UPDATE_USER, UPDATE_CHAT } from '../actionTypes';
+import { GET_MESSAGES, GET_USERS, UPDATE_USER, UPDATE_CHAT, IMAGE_LOADER } from '../actionTypes';
 
 const initialState = {
     messages: [],
-    allUsers: []
+    allUsers: [],
+    imageLoader: false
 }
 
 export default function ChatReducer(state = initialState, action) {
@@ -14,7 +15,9 @@ export default function ChatReducer(state = initialState, action) {
         case UPDATE_USER:
             return state = { ...state, allUsers: [...state.allUsers, action.user] }
         case UPDATE_CHAT:
-            return state = { ...state, messages: [...state.messages, action.chat] }
+            return state = { ...state, messages: [...state.messages, action.chat], imageLoader: false }
+        case IMAGE_LOADER:
+            return state = { ...state, imageLoader: true }
         default:
             return state;
     }

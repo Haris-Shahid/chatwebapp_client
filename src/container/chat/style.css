@@ -95,6 +95,24 @@
     color: darkgrey;
 }
 
+.image-loader-container{
+    float: right;
+    margin: 10px 0px; 
+}
+
+.image-loader-container > div{
+    height: 150px;
+    width: 220px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: deepskyblue;
+    border-radius: 10px;
+}
+.image-loader{
+    color: #fff !important;
+}
+
 
 
 
