@@ -8,7 +8,6 @@ import { CircularProgress } from '@material-ui/core';
 
 import ChatAction from '../../store/actions/chatAction';
 import AuthAction from '../../store/actions/authAction';
-import { MessageList } from 'react-chat-elements'
 
 class Chat extends Component {
     constructor(props) {
@@ -98,18 +97,15 @@ class Chat extends Component {
         }
     }
 
-    showMore(e) {
-        e.preventDefault()
+    showMore() {
+        let firstMessage = document.querySelectorAll(".messages .message")[0]
+        firstMessage.scrollIntoView()
         this.setState({ showMore: this.state.showMore + 20, scrollDisable: true })
     }
 
     render() {
         const { username, _id } = this.props.history.location.state.selectedUser;
         const { messages, message, showMore } = this.state;
-        let showMessages = messages.length !== 0 ?
-            messages.length > 20 ?
-                messages.slice(Math.max(messages.length - showMore, 0)) :
-                messages : null
         return (
             <div className="row main-container" style={{ height: window.innerHeight - 20 }} >
                 <div className='col-md-2 user-list-cont' >
@@ -118,45 +114,47 @@ class Chat extends Component {
                 <div className='col-md-10 section' >
                     <div className='section_child' >
                         <h3>Chat With {username}</h3>
-                        <ul className="chat-list-cont" id='messageList' >
-                            {showMessages && messages.length > 20 ? messages.length === showMessages.length ? null : <button onClick={(e) => this.showMore(e)} >show more</button> : null}
-                            {showMessages && showMessages.map((v, i) => {
-                                if (v.receiverId === _id && v.senderId === this.props._id) {
-                                    return (
-                                        <div key={i} style={{ textAlign: 'right' }}  >
-                                            <div className="sender-chat" >
-                                                {v.chat.image && <img src={v.chat.image} alt='image is removed' />}
-                                                {v.chat.message && <li>{v.chat.message}</li>}
+                        <div className="chat-list-cont messages" id='messageList' >
+                            {messages && messages.length > 20 ? showMore >= messages.length ? null : <button onClick={() => this.showMore()} >show more</button> : null}
+                            {messages && messages.map((v, i) => {
+                                if (i > Math.max((messages.length - 1) - showMore)) {
+                                    if (v.receiverId === _id && v.senderId === this.props._id) {
+                                        return (
+                                            <div key={i} className='message' style={{ textAlign: 'right' }} id={i} >
+                                                <div className="sender-chat" >
+                                                    {v.chat.image && <img src={v.chat.image} alt='image is removed' />}
+                                                    {v.chat.message && <div>{v.chat.message}</div>}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )
-                                }
-                                if (v.receiverId === this.props._id && v.senderId === _id) {
-                                    return (
-                                        <div key={i} >
-                                            <div className="receiver-chat" >
-                                                {v.chat.image && <img src={v.chat.image} alt='image is removed' />}
-                                                {v.chat.message && <li>{v.chat.message}</li>}
+                                        )
+                                    }
+                                    if (v.receiverId === this.props._id && v.senderId === _id) {
+                                        return (
+                                            <div key={i} className='message' id={i} >
+                                                <div className="receiver-chat" >
+                                                    {v.chat.image && <img src={v.chat.image} alt='image is removed' />}
+                                                    {v.chat.message && <div>{v.chat.message}</div>}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )
+                                        )
+                                    }
                                 }
-                                return null
-                            })}
+                                    return null
+                                })}
                             {this.props.imageLoader ?
                                 <div className='image-loader-container' >
                                     <div>
                                         <CircularProgress className='image-loader' />
                                     </div>
                                 </div> : null}
-                        </ul>
+                        </div>
                         <div className='image-container' style={{ display: this.state.imageStatus ? 'block' : 'none' }} >
                             <button onClick={() => this.setState({ uploadImage: '', imageStatus: false, uploadImage1: '' })} style={{ display: this.state.imageStatus ? 'block' : 'none' }} >X</button>
                             <img alt='image is not loaded' src={this.state.uploadImage} className='message-image' style={{ display: this.state.imageStatus ? 'block' : 'none' }} />
                         </div>
                     </div>
                     <div className='input_cont' >
-                        <textarea rows={1} onChange={(e) => this.setState({ message: e.target.value })} value={message} ></textarea>
+                        <textarea rows={1} onChange={(e) => this.setState({ message: e.target.value, scrollDisable: false })} value={message} ></textarea>
                         <button onClick={this.handleSubmit.bind(this)} >Send</button>
                         <button type='file' onClick={this.uploadImage.bind(this)} >Image Upload</button>
                     </div>
